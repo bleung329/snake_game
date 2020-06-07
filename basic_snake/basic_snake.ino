@@ -34,7 +34,6 @@ void drawSquare(byte x, byte y, byte thing)
       display.drawRect(6*x+2,6*y+3,4,4,WHITE);
       return;
   }
-  //Serial.println(F("Fired"));
   display.fillRect(6*x+2,6*y+3,4,4,BLACK);
 }
 
@@ -82,8 +81,6 @@ void redirect()
   //Listen for button presses
   while (millis()-tempTime < BUTTON_INTERVAL)
   {
-      Serial.println(millis()-tempTime);
-
     if (digitalRead(LEFT_B_IN)){L = true;}
     if (digitalRead(RIGHT_B_IN)){R = true;}
   }
@@ -116,16 +113,36 @@ bool moveSnake()
 
   coord newHead = {byte(x),byte(y)};
   drawSquare(newHead.x,newHead.y,1);
+  
+  //Did we land on food?
   bool food = false;
+  if (newHead.x == foodCoord.x && newHead.y == foodCoord.y)
+  {
+    food = true;
+  }
   
   //Shift snake back
   for (int i = snakeLength; i != 0; --i)
   {
+    if (!food && newHead.x == snake[i].x && newHead.y == snake[i].y)
+    {
+      return 1;
+    }
     snake[i] = snake[i-1];
   }
   snake[0] = newHead;
+
   //Erase tail
-  drawSquare(snake[snakeLength].x,snake[snakeLength].y,0);
+  if (!food)
+  {
+    drawSquare(snake[snakeLength].x,snake[snakeLength].y,0);
+  }
+  else
+  {
+    //Dont erase tail, increment length of snake
+    snakeLength++;
+    putFood();
+  }
   return 0;
 }
   /*
@@ -180,7 +197,6 @@ void putFood()
     }
   }
   drawSquare(foodCoord.x,foodCoord.y,2);
-  display.display();
 }
 
 void setup() 
@@ -234,10 +250,13 @@ void setup()
 
 //Game loop
 void loop() {
+
   //GAME SETUP
   //Make the snake and place the food
   makeSnake();
   putFood();
+  display.display();
+  bool win = false;
   delay(400);
 
   //Start game
@@ -253,26 +272,37 @@ void loop() {
       {
         break;
       }
+      if (snakeLength == 8)
+      {
+        win = true;
+        break;
+      }
       display.display();
     }
   }
   
-  display.clearDisplay();
-  display.setTextSize(3);
-  display.setTextColor(WHITE);
-  display.setCursor(20,5);
-  display.println(F("LOSE"));
-  display.display();
+  if (win)
+  {
 
-  for(;;);
-/*
-  if (L){ 
+  }
+  //Show lose screen
+  else
+  {
     display.invertDisplay(true);
-  }
-  if (R){
+    delay(400);
     display.invertDisplay(false);
+    delay(400);
+    display.invertDisplay(true);
+    delay(400);
+    display.invertDisplay(false);
+    delay(400);
+    display.clearDisplay();
+    display.setTextSize(3);
+    display.setTextColor(WHITE);
+    display.setCursor(20,5);
+    display.println(F("LOSE"));
+    display.display();
   }
-
-*/
+  for(;;);
 }
 
