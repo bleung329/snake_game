@@ -128,7 +128,8 @@ bool moveSnake()
   bool onFood = (newHead.x == foodCoord.x && newHead.y == foodCoord.y);
   
   //Shift all the snake coords back to make space for the head
-  for (int i = snakeLength; i != 0; --i)
+  snake[snakeLength] = snake[snakeLength-1]; //To avoid a bug with snakeLength 3
+  for (int i = snakeLength-1; i != 0; --i)
   {
     //If the new head contacts any snake coord, exit and lose
     if (!onFood && newHead.x == snake[i].x && newHead.y == snake[i].y)
