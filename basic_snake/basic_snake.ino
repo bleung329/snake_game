@@ -33,6 +33,7 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 //x is between 0 and 20 inclusive
 //y is between 0 and 9 inclusive
 //thing: 0 = erase, 1 = snake, 2 = food 
+//Could've used a switch statement here...
 void drawSquare(byte x, byte y, byte thing)
 {
   if (thing == 1){
@@ -49,7 +50,7 @@ void drawSquare(byte x, byte y, byte thing)
 //---------SNAKE STUFF---------
 
 //Coordinate struct
-//With the size of the gameboard, you could technically shrink it to
+//With the size of the game board (21x10), you could technically shrink it to
 //1 byte, but I don't quite know how to do that yet.
 typedef struct
 {
@@ -92,7 +93,7 @@ void redirect()
     if (digitalRead(RIGHT_B_IN)){R = true;}
   }
   //Ignore double presses and non presses
-  if ((!R && !L) || (R && L)){
+  if (R == L){
     return;
   }
   //If right, increment direction index
@@ -136,7 +137,8 @@ bool moveSnake()
     }
     snake[i] = snake[i-1];
   }
-  //If nothing wrong, set the new head.
+
+  //If nothing wrong, set the new head of the snake.
   snake[0] = newHead;
 
   //If no food, erase tail
@@ -154,6 +156,7 @@ bool moveSnake()
   return 0;
 }
 
+//Puts a new piece of food on the game board.
 void putFood()
 {
   bool foodOkay = false;
@@ -207,19 +210,18 @@ void setup()
   display.setTextColor(WHITE);
   display.setCursor(20,5);
   display.println(F("SNAKE"));
-
   display.setTextSize(1);
   display.setCursor(26,40);
   display.println(F("Hit L to play"));
-  display.display();
-  
-  //Wait for user input
-  while (!digitalRead(LEFT_B_IN)){}
 }
 
 
 //Game loop
 void loop() {
+
+  display.display();
+  //Wait for user input
+  while (!digitalRead(LEFT_B_IN)){}
 
   //GAME SETUP
   //Set up borders
@@ -228,7 +230,6 @@ void loop() {
   display.fillRect(0,62,128,2,WHITE);
   display.fillRect(0,0,1,64,WHITE);
   display.fillRect(127,0,1,64,WHITE);
-  display.display();  
 
   //Make the snake and place the food
   makeSnake();
@@ -259,7 +260,7 @@ void loop() {
       display.display();
     }
   }
-  
+
   if (win)
   {
     display.clearDisplay();
@@ -295,7 +296,5 @@ void loop() {
   display.println();
   display.println();
   display.println(F("Hit L to play again"));
-  display.display();
-  while (!digitalRead(LEFT_B_IN)){}
 }
 
